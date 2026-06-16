@@ -81,9 +81,9 @@ void OrderBook::print() const {
     if (asks_.empty()) {
         std::cout << "  (empty)\n";
     } else {
-        for (auto rit = asks_.rbegin(); rit != asks_.rend(); ++rit) {
-            std::cout << "  $" << formatPrice(rit->first) << "\n";
-            printOrdersAtLevel(rit->second);
+        for (const auto& [price, orders] : asks_) {
+            std::cout << "  $" << formatPrice(price) << "\n";
+            printOrdersAtLevel(orders);
         }
     }
 
