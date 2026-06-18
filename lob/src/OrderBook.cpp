@@ -74,6 +74,28 @@ std::optional<Price> OrderBook::bestAsk() const {
     return asks_.begin()->first;
 }
 
+std::optional<Order> OrderBook::topBid() const {
+    if (bids_.empty()) return std::nullopt;
+    return bids_.begin()->second.front();
+}
+
+std::optional<Order> OrderBook::topAsk() const {
+    if (asks_.empty()) return std::nullopt;
+    return asks_.begin()->second.front();
+}
+
+void OrderBook::reduceQuantity(OrderId id, Quantity amount) {
+    auto it = order_index_.find(id);
+    if (it == order_index_.end()) return;
+
+    Order& order = *(it->second.it);
+    if (amount >= order.quantity) {
+        cancel(id);
+    } else {
+        order.quantity -= amount;
+    }
+}
+
 void OrderBook::print() const {
     std::cout << "\n========== ORDER BOOK ==========\n";
 
@@ -97,12 +119,13 @@ void OrderBook::print() const {
         }
     }
 
-    if (bestBid() && bestAsk()) {
-        std::cout << "\nBest bid: $" << formatPrice(*bestBid())
-                  << " | Best ask: $" << formatPrice(*bestAsk()) << "\n";
-    } else {
-        std::cout << "\nBest bid: -- | Best ask: --\n";
-    }
+    std::cout << "\nBest bid: ";
+    if (bestBid()) std::cout << '$' << formatPrice(*bestBid());
+    else std::cout << "--";
+    std::cout << " | Best ask: ";
+    if (bestAsk()) std::cout << '$' << formatPrice(*bestAsk());
+    else std::cout << "--";
+    std::cout << '\n';
 
     std::cout << "================================\n\n";
 }

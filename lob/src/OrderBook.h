@@ -16,6 +16,10 @@ public:
     std::optional<Price> bestBid() const;
     std::optional<Price> bestAsk() const;
 
+    std::optional<Order> topBid() const;
+    std::optional<Order> topAsk() const;
+    void reduceQuantity(OrderId id, Quantity amount);
+
 private:
     using OrderList = std::list<Order>;
 

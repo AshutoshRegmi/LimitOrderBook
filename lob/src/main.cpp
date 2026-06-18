@@ -1,35 +1,40 @@
+#include "MatchingEngine.h"
 #include "OrderBook.h"
 
 #include <iostream>
 
 int main() {
   OrderBook book;
+  MatchingEngine engine(book);
 
-  std::cout << "=== Day 1: Adding orders ===\n";
-
-  // 5 buy orders (some at same price to show FIFO queue)
-  book.add({1, Side::BUY, OrderType::LIMIT, 10050, 100, "AAPL", 1});  // $100.50
-  book.add({2, Side::BUY, OrderType::LIMIT, 10050, 200, "AAPL", 2});  // $100.50
-  book.add({3, Side::BUY, OrderType::LIMIT, 10025, 150, "AAPL", 3});  // $100.25
-  book.add({4, Side::BUY, OrderType::LIMIT, 10000, 300, "AAPL", 4});  // $100.00
-  book.add({5, Side::BUY, OrderType::LIMIT, 9950, 50, "AAPL", 5});    // $99.50
-
-  // 5 sell orders
-  book.add({6, Side::SELL, OrderType::LIMIT, 10100, 100, "AAPL", 6});  // $101.00
-  book.add({7, Side::SELL, OrderType::LIMIT, 10125, 200, "AAPL", 7});  // $101.25
-  book.add({8, Side::SELL, OrderType::LIMIT, 10125, 75, "AAPL", 8});   // $101.25
-  book.add({9, Side::SELL, OrderType::LIMIT, 10150, 400, "AAPL", 9});  // $101.50
-  book.add({10, Side::SELL, OrderType::LIMIT, 10200, 50, "AAPL", 10}); // $102.00
-
+  // Scenario 1: simple cross — full fill
+  std::cout << "=== Scenario 1: Simple cross ===\n";
+  book.add({1, Side::SELL, OrderType::LIMIT, 10100, 100, "AAPL", 1});  // $101.00
+  engine.process({2, Side::BUY, OrderType::LIMIT, 10100, 100, "AAPL", 2});
   book.print();
 
-  std::cout << "=== Cancelling order 2 (middle of $100.50 bid level) ===\n";
-  if (book.cancel(2)) {
-    std::cout << "Order 2 cancelled.\n";
-  } else {
-    std::cout << "Failed to cancel order 2.\n";
-  }
+  // Scenario 2: partial fill — buy 100, only 60 available
+  std::cout << "=== Scenario 2: Partial fill ===\n";
+  book.add({3, Side::SELL, OrderType::LIMIT, 10100, 60, "AAPL", 3});
+  engine.process({4, Side::BUY, OrderType::LIMIT, 10100, 100, "AAPL", 4});
+  book.print();
 
+  // Scenario 3: walk the book — buy crosses multiple ask levels
+  std::cout << "=== Scenario 3: Walk the book ===\n";
+  book.add({5, Side::SELL, OrderType::LIMIT, 10100, 50, "AAPL", 5});
+  book.add({6, Side::SELL, OrderType::LIMIT, 10125, 50, "AAPL", 6});
+  book.add({7, Side::SELL, OrderType::LIMIT, 10150, 50, "AAPL", 7});
+  engine.process({8, Side::BUY, OrderType::LIMIT, 10200, 120, "AAPL", 8});
+  book.print();
+
+  // Scenario 4: no match — bid below ask, order rests
+  std::cout << "=== Scenario 4: No match (order rests) ===\n";
+  engine.process({9, Side::BUY, OrderType::LIMIT, 10000, 100, "AAPL", 9});  // $100.00
+  book.print();
+
+  // Scenario 5: market buy — takes best available ask
+  std::cout << "=== Scenario 5: Market buy ===\n";
+  engine.process({10, Side::BUY, OrderType::MARKET, 0, 30, "AAPL", 10});
   book.print();
 
   return 0;
