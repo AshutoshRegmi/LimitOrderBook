@@ -11,6 +11,8 @@ class OrderBook {
 public:
     void add(const Order& order);
     bool cancel(OrderId id);
+    bool modify(OrderId id, Quantity new_qty, std::optional<Price> new_price = std::nullopt);
+    std::optional<Order> getOrder(OrderId id) const;
     void print() const;
 
     std::optional<Price> bestBid() const;

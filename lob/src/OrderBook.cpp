@@ -64,6 +64,39 @@ bool OrderBook::cancel(OrderId id) {
     return true;
 }
 
+bool OrderBook::modify(OrderId id, Quantity new_qty, std::optional<Price> new_price) {
+    auto it = order_index_.find(id);
+    if (it == order_index_.end()) {
+        return false;
+    }
+
+    if (new_qty == 0) {
+        return cancel(id);
+    }
+
+    Order& order = *(it->second.it);
+
+    if (new_price && *new_price != order.price) {
+        Order updated = order;
+        updated.price = *new_price;
+        updated.quantity = new_qty;
+        cancel(id);
+        add(updated);
+        return true;
+    }
+
+    order.quantity = new_qty;
+    return true;
+}
+
+std::optional<Order> OrderBook::getOrder(OrderId id) const {
+    auto it = order_index_.find(id);
+    if (it == order_index_.end()) {
+        return std::nullopt;
+    }
+    return *(it->second.it);
+}
+
 std::optional<Price> OrderBook::bestBid() const {
     if (bids_.empty()) return std::nullopt;
     return bids_.begin()->first;
