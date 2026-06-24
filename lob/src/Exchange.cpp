@@ -23,6 +23,12 @@ bool Exchange::modify(const std::string& symbol, OrderId id, Quantity new_qty,
     return it->second.modify(id, new_qty, new_price);
 }
 
+void Exchange::reduceQuantity(const std::string& symbol, OrderId id, Quantity amount) {
+    auto it = books_.find(symbol);
+    if (it == books_.end()) return;
+    it->second.reduceQuantity(id, amount);
+}
+
 std::optional<Order> Exchange::getOrder(const std::string& symbol, OrderId id) const {
     const OrderBook* book = findBook(symbol);
     if (!book) return std::nullopt;

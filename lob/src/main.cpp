@@ -1,5 +1,6 @@
 #include "Benchmark.h"
 #include "Exchange.h"
+#include "ITCHParser.h"
 #include "OrderBook.h"
 
 #include <iostream>
@@ -9,6 +10,25 @@ int main(int argc, char* argv[]) {
   if (argc > 1 && std::string(argv[1]) == "--benchmark") {
     runBenchmark();
     return 0;
+  }
+
+  if (argc > 2 && std::string(argv[1]) == "--replay") {
+    Exchange exchange;
+    ITCHParser parser(exchange);
+    const ITCHParseStats stats = parser.replayFile(argv[2]);
+
+    std::cout << "=== ITCH Feed Replay ===\n";
+    std::cout << "File: " << argv[2] << '\n';
+    std::cout << "Messages: " << stats.messages << '\n';
+    std::cout << "Adds: " << stats.add_orders << " | Deletes: " << stats.deletes
+              << " | Replaces: " << stats.replaces << '\n';
+    std::cout << "Executions: " << stats.executions
+              << " | Trade msgs: " << stats.trade_messages << '\n';
+    std::cout << "Trades generated: " << stats.trades_generated << '\n';
+    std::cout << "Ignored: " << stats.ignored << " | Errors: " << stats.errors
+              << '\n';
+    std::cout << "Symbols: " << exchange.symbolCount() << '\n';
+    return stats.errors == 0 ? 0 : 1;
   }
 
   OrderBook book;

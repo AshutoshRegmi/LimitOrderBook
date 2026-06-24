@@ -15,6 +15,7 @@ public:
     bool cancel(const std::string& symbol, OrderId id);
     bool modify(const std::string& symbol, OrderId id, Quantity new_qty,
                 std::optional<Price> new_price = std::nullopt);
+    void reduceQuantity(const std::string& symbol, OrderId id, Quantity amount);
     std::optional<Order> getOrder(const std::string& symbol, OrderId id) const;
     const OrderBook* book(const std::string& symbol) const;
     size_t symbolCount() const;
