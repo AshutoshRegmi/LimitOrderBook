@@ -39,7 +39,7 @@ std::vector<Trade> MatchingEngine::process(const Order& order) {
             Quantity trade_qty = std::min(remaining, ask->quantity);
             Trade trade{order.id, ask->id, ask->price, trade_qty};
             trades.push_back(trade);
-            printTrade(trade);
+            if (verbose_) printTrade(trade);
 
             book_.reduceQuantity(ask->id, trade_qty);
             remaining -= trade_qty;
@@ -53,7 +53,7 @@ std::vector<Trade> MatchingEngine::process(const Order& order) {
             Quantity trade_qty = std::min(remaining, bid->quantity);
             Trade trade{bid->id, order.id, bid->price, trade_qty};
             trades.push_back(trade);
-            printTrade(trade);
+            if (verbose_) printTrade(trade);
 
             book_.reduceQuantity(bid->id, trade_qty);
             remaining -= trade_qty;

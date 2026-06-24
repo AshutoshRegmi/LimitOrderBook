@@ -1,0 +1,7 @@
+=== Limit Order Book Benchmark ===
+Orders processed: 1000000
+Throughput: 5599143 orders/sec
+Avg latency: 178.6 ns/order (0.2 us/order)
+Workload: 80.0% adds, 20.0% cancels, 42.4% of adds produced trades
+Trades executed: 598886
+Cancels skipped (no live orders): 0
